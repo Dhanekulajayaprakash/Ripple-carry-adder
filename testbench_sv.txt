@@ -1,0 +1,27 @@
+
+`timescale 1ns/100ps
+module ripple_carry_adder_tb;
+    reg [3:0] a, b;
+    wire [3:0] s;
+    wire cout, overflow;
+
+    // Instantiate the ripple carry adder
+    ripple_carry_adder dut (.a(a), .b(b), .s(s), .cout(cout));
+
+    initial begin
+        $dumpfile("ripple_carry_adder.vcd");
+        $dumpvars(0, ripple_carry_adder_tb);
+
+        // Applying test cases
+        a = 4'b0000; b = 4'b0000; #10;
+        a = 4'b0001; b = 4'b0001; #10;
+        a = 4'b0011; b = 4'b0100; #10;
+        a = 4'b0111; b = 4'b1111; #10;  // Test overflow case
+        a = 4'b1111; b = 4'b0001; #10; 
+        #20
+        $finish;
+    end
+  always@(a or b or s or overflow) begin
+    $display("Time: %d, | a: %d | b: %d| s: %d | overflow: %b ", $time, a, b, s, cout);
+  end
+endmodule

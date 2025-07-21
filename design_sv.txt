@@ -1,0 +1,42 @@
+
+`timescale 1ns/100ps
+module full_adder (
+    input a, b, cin, 
+    output s, cout
+);
+  wire w1, w2, w3, w4, w5, w6, w7, w8, w9; 
+
+  // NAND gates implementing the sum and carry logic
+  nand #(1) n1 (w1, a, b);  // w1 = ~(a & b)
+  nand #(1) n2 (w2, a, w1); // w2 = ~(a & ~(a & b)) -> w2 = a | b
+  nand #(1) n3 (w3, b, w1); // w3 = ~(b & ~(a & b)) -> w3 = a | b
+  nand #(1) n4 (w4, w2, w3); // w4 = ~(w2 & w3) -> w4 = a ^ b
+
+  nand #(1) n5 (w5, w4, cin); // w5 = ~(w4 & cin) -> w5 = ~(a ^ b) & cin
+  nand #(1) n6 (w6, w4, w5); // w6 = ~(w4 & w5)
+  nand #(1) n7 (w7, cin, w5); // w7 = ~(cin & w5)
+  nand #(1) n8 (s, w6, w7); // s = ~(w6 & w7) -> s = (a ^ b) ^ cin
+
+  nand #(1) n9 (w9, w4, cin); // w9 = ~(w4 & cin) -> w9 = (a ^ b) & cin
+  nand #(1) n10 (cout, w1, w9); // cout = ~(w1 & w9) -> cout = (a & b) | ((a ^ b) & cin)
+
+endmodule
+
+// Ripple Carry Adder with Overflow Detection
+module ripple_carry_adder (
+    input [3:0] a, 
+    input [3:0] b, 
+    output [3:0] s, 
+    output cout 
+   
+);
+    wire [2:0] c; // Carry wires
+
+    // Instantiate four full adders for the 4-bit ripple carry adder
+    full_adder fa0 (.a(a[0]), .b(b[0]), .cin(1'b0), .s(s[0]), .cout(c[0]));
+    full_adder fa1 (.a(a[1]), .b(b[1]), .cin(c[0]), .s(s[1]), .cout(c[1]));
+    full_adder fa2 (.a(a[2]), .b(b[2]), .cin(c[1]), .s(s[2]), .cout(c[2]));
+    full_adder fa3 (.a(a[3]), .b(b[3]), .cin(c[2]), .s(s[3]), .cout(cout));
+
+
+endmodule
